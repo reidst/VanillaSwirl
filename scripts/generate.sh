@@ -33,8 +33,8 @@ if [ -z "$(ls -A templates/)" ]; then
 	echo "VanillaSwirl Error: template directory empty."
 	exit 1
 fi
-if [ ! -f "hostname" ] || [ -z "$(cat hostname)" ]; then
-	echo "VanillaSwirl Error: missing or empty hostname file."
+if [ ! -f "hostname.txt" ] || [ -z "$(cat hostname.txt)" ]; then
+	echo "VanillaSwirl Error: missing or empty hostname.txt file."
 	exit 1
 fi
 detect_duplicates
