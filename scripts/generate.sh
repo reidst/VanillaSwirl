@@ -34,6 +34,18 @@ function snake_to_title_case {
 	local capitalized=$(join_by '_' "${words[@]}")
 	printf '%s' "${capitalized//_/\ }"
 }
+function generate_local_datapack {
+	local returnto=$(pwd)
+	cd $1
+	mkdir -p datapacks/server_local/data/server_local/function
+	mkdir -p datapacks/server_local/data/minecraft/tags/function
+	cp datapacks/server/pack.mcmeta datapacks/server_local/
+	mv ../*.mcfunction datapacks/server_local/data/server_local/function/
+	cd datapacks/server_local/data/minecraft/tags/function
+	echo '{"values":["server_local:load"]}' > load.json
+	echo '{"values":["server_local:tick"]}' > tick.json
+	cd $returnto
+}
 
 if [ -n "$(ls -A servers/)" ]; then
 	echo "VanillaSwirl Error: servers have already been generated."
@@ -91,5 +103,8 @@ for server in servers/*; do
 	world_name=${world_name#*=}
 	mkdir -p $server/$world_name/datapacks
 	cp -r datapack.tmp $server/$world_name/datapacks/server
+	if [ -f "${server}/load.mcfunction" ] || [ -f "${server}/tick.mcfunction" ]; then
+		generate_local_datapack $server/$world_name
+	fi
 done
 rm -r datapack.tmp
