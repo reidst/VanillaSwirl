@@ -119,7 +119,6 @@ under any of the following conditions:
 - `hostname.txt` is missing or empty
 - there are multiple templates with the same name (ignoring sorting prefixes)
 - not all worlds would have a `run.sh` file
-- servers are already running
 
 Physical servers exist as `servers/` subdirectories named after their
 corresponding templates (with sorting prefixes removed; see

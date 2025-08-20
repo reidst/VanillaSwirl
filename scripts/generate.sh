@@ -71,10 +71,6 @@ if [ ! -f "hostname.txt" ] || [ -z "$(cat hostname.txt)" ]; then
 fi
 detect_duplicates
 detect_missing_run
-if scripts/are_servers_running.sh; then
-	echo "VanillaSwirl Error: cannot generate new servers while old ones are running."
-	exit 1
-fi
 
 port=25565
 warp_buttons=()
