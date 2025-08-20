@@ -47,11 +47,11 @@ function generate_local_datapack {
 	cd $returnto
 }
 
-if [ -n "$(ls -A servers/)" ]; then
+if [ -n "$(ls servers/*/ 2>/dev/null)" ]; then
 	echo "VanillaSwirl Error: servers have already been generated."
 	exit 1
 fi
-if [ -z "$(ls -A templates/)" ]; then
+if [ -z "$(ls templates/*/ 2>/dev/null)" ]; then
 	echo "VanillaSwirl Error: template directory empty."
 	exit 1
 fi
