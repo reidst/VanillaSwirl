@@ -50,14 +50,14 @@ for name in templates/*; do
 	clean_name=${name#*_}
 	if [ ! -d $name ]; then continue; fi
 	mkdir servers/$clean_name
-	cp common/* servers/$clean_name/
+	cp -r common/* servers/$clean_name/
 	if [ -n "$(ls -A $name)" ]; then
 		for file in $name/*; do
 			if [ "${file##*/}" == "server.properties" ]; then
 				printf '\n' >> servers/$clean_name/server.properties
 				cat $file >> servers/$clean_name/server.properties
 			else
-				cp $file servers/$clean_name/
+				cp -r $file servers/$clean_name/
 			fi
 		done
 	fi
