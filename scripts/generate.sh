@@ -24,6 +24,16 @@ function detect_duplicates {
 		done
 	done
 }
+function detect_missing_run {
+	if [ -f common/run.sh ]; then return; fi
+	for template_name in templates/*; do
+		if [ ! -d $template_name ]; then continue; fi
+		if [ ! -f $template_name/run.sh ]; then
+			echo "VanillaSwirl Error: the template ${template_name#*/} has no run.sh (and no common run.sh exists)."
+			exit 1
+		fi
+	done
+}
 function snake_to_title_case {
 	local words
 	IFS='_' read -a words <<< "$1"
@@ -60,6 +70,7 @@ if [ ! -f "hostname.txt" ] || [ -z "$(cat hostname.txt)" ]; then
 	exit 1
 fi
 detect_duplicates
+detect_missing_run
 if scripts/are_servers_running.sh; then
 	echo "VanillaSwirl Error: cannot generate new servers while old ones are running."
 	exit 1
