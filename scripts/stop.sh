@@ -6,6 +6,7 @@ if ! [ "$timer" -ge 0 ] 2>/dev/null; then
 fi
 if ! scripts/are_servers_running.sh; then
     echo "VanillaSwirl Error: no servers are currently running."
+    exit 1
 fi
 scripts/global_command.sh "say The server will be shutting down in $timer seconds."
 sleep $timer
