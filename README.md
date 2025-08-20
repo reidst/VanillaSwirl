@@ -13,7 +13,7 @@ can teleport players between these worlds.
 $ git clone https://github.com/reidst/VanillaSwirl.git
 $ cd VanillaSwirl
 ```
-2. Install a Minecraft `server.jar`:
+2. Install a Minecraft server jarfile:
 ```sh
 $ wget -O common/server.jar <some URL>
 ```
@@ -26,7 +26,7 @@ almost every case, this means using a common server version.
 echo 'eula=true' > common/eula.txt
 ```
 4. Write your hostname to the `hostname.txt` file (this is the same address you
-would enter into the `Server Address` field in Minecraft's multiplayer menu):
+would enter into the "Server Address" field in Minecraft's multiplayer menu):
 ```sh
 $ echo 'myserverdomainname.net' > hostname.txt
 ```
@@ -46,12 +46,14 @@ re-generated, started, or backed up if worlds are already running.
 - For each world you want to serve, create a unique subdirectory within the
 `templates/` directory. Files in a template subdirectory will be unique to a
 world and will overwrite common files upon server generation (with the exception
-of `server.properties` files, for which the template version will append the
-common version). An empty template subdirectory is valid, merely describing a
-world with no unique settings.
+of `server.properties` files; see below). An empty template subdirectory is
+valid, merely describing a world with no unique settings.
+- `server.properties` files are concatenated such that fields described in a
+template will override those from a common file. This means that having an empty
+`server.properties` file in a template is the same as not having it there at
+all.
 - Files in a template ending in `.mcfunction` will be converted into a datapack
-local to the world. `load.mcfunction` and `tick.mcfunction` files will be added
-to the respective `#minecraft:load` and `#minecraft:tick` function tags.
+local to the world. See [Datapacks](#datapacks) below for details.
 - Templates are sorted lexicographically with the first template getting the
 default server port (25565) and subsequent templates getting subsequent ports.
 - Template names are expected to take the form `<prefix>_<name>`. The prefix and
@@ -65,10 +67,10 @@ named Hub (running on port 25565), Creative Sandbox (25566), and Hardcore
 The following files are required by each world and therefore come preinstalled
 under `common/`:
 - `run.sh` calls the java runtime and decides parameters such as memory
-limitations.
+limitations. This can be modified or overridden on a per-world basis.
 - `server.properties` with the fields `accepts-transfers=true` and
 `function-permission-level=3` enables the builtin datapack to warp players
-between worlds.
+between worlds. Do not modify or override these fields.
 
 ## Running
 Each world is run within a `screen` session: a world created from
@@ -85,6 +87,20 @@ command on a single world, do so via:
 ```sh
 $ screen -S vanillaswirl.<world_name> -X stuff 'kick AnnoyingPerson^M'
 ```
+
+## Datapacks
+The datapack provided by VanillaSwirl enables players to warp between worlds via
+the vanilla `/transfer` command. It can be triggered from a custom dialog menu
+named "Warp Menu," which can be found in the pause menu or accessed by pressing
+the quick actions button ingame (defaults to <kbd>G</kbd>). The datapack is
+accessible from each world as `file/server` and operates under the `server`
+namespace.
+
+If `.mcfunction` files are provided as world configuration files, they are
+compiled to another datapack, accessible as `file/server_local` and operating
+under the `server_local` namespace. This datapack will add the
+`server_local:load` and `server_local:tick` functions to the respective
+`#minecraft:local` and `#minecraft:tick` function tags.
 
 ## Notes
 This project was made in a few afternoons by a stubborn Minecrafter who wanted
