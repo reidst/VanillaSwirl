@@ -14,7 +14,7 @@ $ git clone https://github.com/reidst/VanillaSwirl.git
 $ cd VanillaSwirl
 ```
 2. Configure your worlds. See [Configuration](#configuration) below.
-3. Write your hostname to the `hostname` file (this is the same address you
+3. Write your hostname to the `hostname.txt` file (this is the same address you
 would enter into the `Server Address` field in Minecraft's multiplayer menu).
 For instance, if your server has the domain name `mycoolmcserver.net`, then run:
 ```sh
