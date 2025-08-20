@@ -54,13 +54,16 @@ for name in templates/*; do
 	if [ -n "$(ls -A $name)" ]; then
 		for file in $name/*; do
 			if [ "${file##*/}" == "server.properties" ]; then
+				printf '\n' >> servers/$clean_name/server.properties
 				cat $file >> servers/$clean_name/server.properties
 			else
 				cp $file servers/$clean_name/
 			fi
 		done
 	fi
+	printf '\n' >> servers/$clean_name/server.properties
 	echo "server-port=$port" >> servers/$clean_name/server.properties
+	sed -i '/^[[:space:]]*$/d' servers/$clean_name/server.properties
 	warp_buttons+=("{\"label\":\"Warp to ${clean_name^}\",\"action\":{\"type\":\"run_command\",\"command\":\"trigger server.warp set $port\"}}")
 	(( port++ ))
 done
