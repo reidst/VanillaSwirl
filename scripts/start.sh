@@ -9,8 +9,6 @@ if [ -z "$(ls -A servers/*)" ]; then
 fi
 root=$(pwd)
 for server in servers/*; do
-    name=${server#*/}
-    if screen -ls vanillaswirl.$name >/dev/null; then continue; fi
     cd $root/$server
-    screen -S vanillaswirl.$name -d -m ./run.sh
+    screen -S vanillaswirl.${server#*/} -d -m ./run.sh
 done
