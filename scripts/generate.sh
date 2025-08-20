@@ -24,6 +24,16 @@ function detect_duplicates {
 		done
 	done
 }
+function snake_to_title_case {
+	local words
+	IFS='_' read -a words <<< "$1"
+	local len="${#words[@]}"
+	for (( i=0; i<len; i++ )); do
+		words[$i]=${words[$i]^}
+	done
+	local capitalized=$(join_by '_' "${words[@]}")
+	printf '%s' "${capitalized//_/\ }"
+}
 
 if [ -n "$(ls -A servers/)" ]; then
 	echo "VanillaSwirl Error: servers have already been generated."
@@ -64,7 +74,8 @@ for name in templates/*; do
 	printf '\n' >> servers/$clean_name/server.properties
 	echo "server-port=$port" >> servers/$clean_name/server.properties
 	sed -i '/^[[:space:]]*$/d' servers/$clean_name/server.properties
-	warp_buttons+=("{\"label\":\"Warp to ${clean_name^}\",\"action\":{\"type\":\"run_command\",\"command\":\"trigger server.warp set $port\"}}")
+	pretty_name=$(snake_to_title_case $clean_name)
+	warp_buttons+=("{\"label\":\"Warp to ${pretty_name}\",\"action\":{\"type\":\"run_command\",\"command\":\"trigger server.warp set $port\"}}")
 	(( port++ ))
 done
 
