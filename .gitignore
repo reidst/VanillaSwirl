@@ -1,0 +1,6 @@
+backups/*
+common/*
+servers/*
+templates/*
+!common/server.properties
+!common/run.sh

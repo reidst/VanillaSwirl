@@ -1,0 +1,14 @@
+{
+    "title": "Warp Menu",
+    "pause": false,
+    "type": "multi_action",
+    "body": [
+        {
+            "type": "plain_message",
+            "contents": {
+                "text": "Use the following links to warp to other worlds on this server. This menu will be available from each world."
+            }
+        }
+    ],
+    "actions": []
+}
