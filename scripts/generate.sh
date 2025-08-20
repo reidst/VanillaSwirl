@@ -55,24 +55,26 @@ fi
 
 port=25565
 warp_buttons=()
-for name in templates/*; do
-	clean_name=${name#*/}
-	clean_name=${name#*_}
-	if [ ! -d $name ]; then continue; fi
+for template_name in templates/*; do
+	clean_name=${template_name#*/}
+	clean_name=${template_name#*_}
+	if [ ! -d $template_name ]; then continue; fi
 	mkdir servers/$clean_name
 	cp -r common/* servers/$clean_name/
-	if [ -n "$(ls -A $name)" ]; then
-		for file in $name/*; do
-			if [ "${file##*/}" == "server.properties" ]; then
+	if [ -n "$(ls -A $template_name)" ]; then
+		for template_file in $template_name/*; do
+			if [ "${template_file##*/}" == "server.properties" ]; then
 				printf '\n' >> servers/$clean_name/server.properties
-				cat $file >> servers/$clean_name/server.properties
+				cat $template_file >> servers/$clean_name/server.properties
 			else
-				cp -r $file servers/$clean_name/
+				cp -r $template_file servers/$clean_name/
 			fi
 		done
 	fi
-	printf '\n' >> servers/$clean_name/server.properties
-	echo "server-port=$port" >> servers/$clean_name/server.properties
+	if ! grep -q '^level-name=' servers/$clean_name/server.properties; then
+		printf '\nlevel-name=%s' "$clean_name" >> servers/$clean_name/server.properties
+	fi
+	printf '\nserver-port=%s' "${port}" >> servers/$clean_name/server.properties
 	sed -i '/^[[:space:]]*$/d' servers/$clean_name/server.properties
 	pretty_name=$(snake_to_title_case $clean_name)
 	warp_buttons+=("{\"label\":\"Warp to ${pretty_name}\",\"action\":{\"type\":\"run_command\",\"command\":\"trigger server.warp set $port\"}}")
@@ -85,7 +87,9 @@ sed -i 's/\[\]/\['"$button_list"'\]/' datapack.tmp/data/server/dialog/warp_menu.
 server_hostname=$(cat hostname.txt)
 sed -i "s/localhost/$server_hostname/" datapack.tmp/data/server/function/transfer.mcfunction
 for server in servers/*; do
-	mkdir -p $server/world/datapacks
-	cp -r datapack.tmp $server/world/datapacks/server
+	world_name=$(grep '^level-name=' $server/server.properties | tail -1)
+	world_name=${world_name#*=}
+	mkdir -p $server/$world_name/datapacks
+	cp -r datapack.tmp $server/$world_name/datapacks/server
 done
 rm -r datapack.tmp
