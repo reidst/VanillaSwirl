@@ -108,6 +108,7 @@ for server in servers/*/; do
 	server=${server%/}
 	world_name=$(grep '^level-name=' $server/server.properties | tail -1)
 	world_name=${world_name#*=}
+	world_name=${world_name:-world}
 	mkdir -p $server/$world_name/datapacks
 	cp -r datapack.tmp $server/$world_name/datapacks/server
 	if [ -f "$server/load.mcfunction" ] || [ -f "$server/tick.mcfunction" ]; then
