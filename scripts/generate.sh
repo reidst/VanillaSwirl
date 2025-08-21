@@ -81,7 +81,7 @@ for template_name in templates/*/; do
 	if [ ! -d $template_name ]; then continue; fi
 	mkdir servers/$clean_name
 	cp -r common/* servers/$clean_name/
-	if ls -A "$template_name/*" >/dev/null 2>&1; then
+	if ls -A $template_name/* >/dev/null 2>&1; then
 		for template_file in $template_name/*; do
 			if [ "${template_file##*/}" == "server.properties" ]; then
 				printf '\n' >> servers/$clean_name/server.properties
