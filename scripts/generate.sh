@@ -48,13 +48,13 @@ function snake_to_title_case {
 }
 function generate_local_datapack (
 	cd $1
-	mkdir -p datapacks/server_local/data/server_local/function
-	mkdir -p datapacks/server_local/data/minecraft/tags/function
-	cp datapacks/server/pack.mcmeta datapacks/server_local/
-	mv ../*.mcfunction datapacks/server_local/data/server_local/function/
-	cd datapacks/server_local/data/minecraft/tags/function
-	echo '{"values":["server_local:load"]}' > load.json
-	echo '{"values":["server_local:tick"]}' > tick.json
+	mkdir -p datapacks/vanillaswirl_local/data/vanillaswirl_local/function
+	mkdir -p datapacks/vanillaswirl_local/data/minecraft/tags/function
+	cp datapacks/vanillaswirl/pack.mcmeta datapacks/vanillaswirl_local/
+	mv ../*.mcfunction datapacks/vanillaswirl_local/data/vanillaswirl_local/function/
+	cd datapacks/vanillaswirl_local/data/minecraft/tags/function
+	echo '{"values":["vanillaswirl_local:load"]}' > load.json
+	echo '{"values":["vanillaswirl_local:tick"]}' > tick.json
 )
 
 if ls servers/*/ >/dev/null 2>&1; then
@@ -95,22 +95,22 @@ for template_name in templates/*/; do
 	printf '\nserver-port=%s' "${port}" >> servers/$clean_name/server.properties
 	sed -i '/^[[:space:]]*$/d' servers/$clean_name/server.properties
 	pretty_name=$(snake_to_title_case $clean_name)
-	warp_buttons+=("{\"label\":\"Warp to ${pretty_name}\",\"action\":{\"type\":\"run_command\",\"command\":\"trigger server.warp set $port\"}}")
+	warp_buttons+=("{\"label\":\"Warp to ${pretty_name}\",\"action\":{\"type\":\"run_command\",\"command\":\"trigger vanillaswirl.warp set $port\"}}")
 	(( port++ ))
 done
 
 cp -r datapack datapack.tmp
 button_list=$(join_by ',' "${warp_buttons[@]}")
-sed -i 's/\[\]/\['"$button_list"'\]/' datapack.tmp/data/server/dialog/warp_menu.json
+sed -i 's/\[\]/\['"$button_list"'\]/' datapack.tmp/data/vanillaswirl/dialog/warp_menu.json
 server_hostname=$(cat hostname.txt)
-sed -i "s/localhost/$server_hostname/" datapack.tmp/data/server/function/transfer.mcfunction
+sed -i "s/localhost/$server_hostname/" datapack.tmp/data/vanillaswirl/function/transfer.mcfunction
 for server in servers/*/; do
 	server=${server%/}
 	world_name=$(grep '^level-name=' $server/server.properties | tail -1)
 	world_name=${world_name#*=}
 	world_name=${world_name:-world}
 	mkdir -p $server/$world_name/datapacks
-	cp -r datapack.tmp $server/$world_name/datapacks/server
+	cp -r datapack.tmp $server/$world_name/datapacks/vanillaswirl
 	if [ -f "$server/load.mcfunction" ] || [ -f "$server/tick.mcfunction" ]; then
 		generate_local_datapack $server/$world_name
 	fi

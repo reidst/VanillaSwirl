@@ -1,5 +1,6 @@
 {
-    "title": "Warp Menu",
+    "title": "VanillaSwirl Warp Menu",
+    "external_title": "Warp Menu",
     "pause": false,
     "type": "multi_action",
     "body": [

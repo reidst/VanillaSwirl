@@ -174,14 +174,16 @@ The datapack provided by VanillaSwirl enables players to warp between worlds via
 the vanilla `/transfer` command. It can be triggered from a custom dialog menu
 named "Warp Menu," which can be found in the pause menu or by pressing the quick
 actions button in-game (defaults to <kbd>G</kbd>). The datapack is accessible
-from each world as `file/server` and operates under the `server` namespace.
+from each world as `file/vanillaswirl` and operates under the `vanillaswirl`
+namespace.
 
 ### Template datapacks
 If `.mcfunction` files are provided as world configuration files, they are
-compiled to another datapack, accessible from each world as `file/server_local`
-and operating under the `server_local` namespace. This datapack will add the
-`server_local:load` and `server_local:tick` functions to the respective
-`#minecraft:local` and `#minecraft:tick` function tags.
+compiled to another datapack, accessible from each world as
+`file/vanillaswirl_local` and operating under the `vanillaswirl_local`
+namespace. This datapack will add the `vanillaswirl_local:load` and
+`vanillaswirl_local:tick` functions to the respective `#minecraft:local` and
+`#minecraft:tick` function tags.
 
 ## Notes
 This project was made in a few afternoons by a stubborn Minecrafter who wanted
