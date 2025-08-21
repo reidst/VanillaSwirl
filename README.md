@@ -134,9 +134,9 @@ Screen session names take the form `<pid>.vanillaswirl.<world_name>`, and the
 sessions automatically end once the contained server process ends. If you wish
 to run a console command in a world, use the following:
 ```sh
-# to run a command without seeing the output
+# to run a command without seeing the output:
 $ screen -S vanillaswirl.<world_name> -X stuff '<your_command>^M'
-# to run a command interactively
+# to run a command interactively:
 $ screen -r vanillaswirl.<world_name>
 $ <your_command>
 # press Ctrl-a Ctrl-d to detach the screen
@@ -156,6 +156,7 @@ The `time` argument is optional, defaulting to 30 seconds.
 Create a backup of each world. This script does not run under any of the
 following conditions:
 - servers are running
+- servers have not yet been generated
 
 The `name` field is optional, defaulting to `yyyy-mm-dd_HH-MM-SS.tar.gz`. For
 each world named `<server_name>`, there will be a corresponding
@@ -164,6 +165,7 @@ each world named `<server_name>`, there will be a corresponding
 ### `global_command.sh <command>`
 Send a console command to all worlds. This script does not run under any of the
 following conditions:
+- a command argument is not provided
 - no servers are running
 
 ## Datapacks

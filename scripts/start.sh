@@ -3,7 +3,7 @@ if screen -ls | grep -q '\.vanillaswirl\.'; then
     echo "VanillaSwirl Error: servers are already running."
     exit 1
 fi
-if [ -z "$(ls -A servers/*)" ]; then
+if ! ls servers/*/ >/dev/null 2>&1; then
     echo "VanillaSwirl Error: there are no servers to start."
     exit 1
 fi
