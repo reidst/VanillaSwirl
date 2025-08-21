@@ -91,9 +91,6 @@ for template_name in templates/*/; do
 			fi
 		done
 	fi
-	if ! grep -q '^level-name=' servers/$clean_name/server.properties; then
-		printf '\nlevel-name=%s' "$clean_name" >> servers/$clean_name/server.properties
-	fi
 	printf '\nserver-port=%s' "${port}" >> servers/$clean_name/server.properties
 	sed -i '/^[[:space:]]*$/d' servers/$clean_name/server.properties
 	pretty_name=$(snake_to_title_case $clean_name)
