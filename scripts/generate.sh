@@ -91,6 +91,7 @@ for template_name in templates/*/; do
 			fi
 		done
 	fi
+	chmod u+x servers/$clean_name/run.sh
 	printf '\nserver-port=%s' "${port}" >> servers/$clean_name/server.properties
 	sed -i '/^[[:space:]]*$/d' servers/$clean_name/server.properties
 	pretty_name=$(snake_to_title_case $clean_name)
