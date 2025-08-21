@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-if scripts/are_servers_running.sh; then
+if screen -ls | grep -q '\.vanillaswirl\.'; then
     echo "VanillaSwirl Error: cannot backup when servers are running."
     exit 1
 fi
