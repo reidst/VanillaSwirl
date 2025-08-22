@@ -1,37 +1,4 @@
 #!/usr/bin/env bash
-function detect_duplicates {
-	local templates=()
-	local len=0
-	local name i j
-	for name in templates/*/; do
-		local clean_name=${name%/}
-		clean_name=${clean_name#*/}
-		clean_name=${clean_name#*_}
-		templates+=($clean_name)
-		(( len++ ))
-	done
-	for (( i=0; i<len; i++ )); do
-		for (( j=0; j<len; j++ )); do
-			if (( i == j )); then continue; fi
-			if [ "${templates[$i]}" == "${templates[$j]}" ]; then
-				echo "VanillaSwirl Error: there is more than one template named (${templates[$i]})."
-				exit 1
-			fi
-		done
-	done
-}
-function detect_missing_run {
-	if [ -f common/run.sh ]; then return; fi
-	for template_name in templates/*/; do
-		template_name=${template_name%/}
-		if [ ! -d $template_name ]; then continue; fi
-		if [ ! -f $template_name/run.sh ]; then
-			echo "VanillaSwirl Error: the template ${template_name#*/} has no run.sh (and no common run.sh exists)."
-			exit 1
-		fi
-	done
-}
-
 if ls servers/*/ >/dev/null 2>&1; then
 	echo "VanillaSwirl Error: servers have already been generated."
 	exit 1
@@ -44,8 +11,30 @@ if [ ! -f "hostname.txt" ] || [ -z "$(cat hostname.txt)" ]; then
 	echo "VanillaSwirl Error: missing or empty hostname.txt file."
 	exit 1
 fi
-detect_duplicates
-detect_missing_run
+for template in templates/*/; do
+	template=${template%/}
+	template_name=${template#*/}
+	clean_name=${template_name#*_}
+	for other_template in templates/*/; do
+		other_template=${other_template%/}
+		if [ $template == $other_template ]; then continue; fi
+		other_template_name=${other_template#*/}
+		other_clean_name=${other_template_name#*_}
+		if [ $clean_name == $other_clean_name ]; then
+			echo "VanillaSwirl Error: templates $template_name and $other_template_name have the same underlying name."
+			exit 1
+		fi
+	done
+done
+if [ ! -x common/run.sh ]; then
+	for template in templates/*/; do
+		template=${template%/}
+		if [ ! -x $template/run.sh ]; then
+			echo "VanillaSwirl Error: the template ${template#*/} has no executable run.sh (and no common run.sh exists)."
+			exit 1
+		fi
+	done
+fi
 
 port=25565
 root=$(pwd)
