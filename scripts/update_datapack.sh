@@ -1,13 +1,12 @@
 #!/usr/bin/env bash
 function snake_to_title_case {
-	local words
-	IFS='_' read -a words <<< "$1"
-	local len="${#words[@]}"
-	for (( i=0; i<len; i++ )); do
-		words[$i]=${words[$i]^}
-	done
-	local capitalized=$(join_by '_' "${words[@]}")
-	printf '%s' "${capitalized//_/\ }"
+    local name="$1"
+    for letter in {a..z}; do
+        upper=${letter^}
+        name=${name//#$letter/$upper}
+        name=${name//_$letter/_$upper}
+    done
+    echo "${name//_/' '}"
 }
 
 if ! ls servers/*/ >/dev/null 2>&1; then

@@ -75,3 +75,4 @@ for template_name in templates/*/; do
 		cd $root
 	fi
 done
+scripts/update_datapack.sh
