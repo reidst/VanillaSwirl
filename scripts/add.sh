@@ -21,7 +21,7 @@ if ! grep -sq '^eula=true$' $server/eula.txt; then
     echo "VanillaSwirl Error: the new server does not agree to the Minecraft EULA."
     exit 1
 fi
-ports=($(grep -sh '^server-ports=' servers/*/server.properties | cut -d'=' -f 2))
+ports=($(grep -sh '^server-port=' servers/*/server.properties | cut -d'=' -f 2))
 if ! grep -sq '^server-port=' $server/server.properties; then
     server_port=25565
     for port in "${ports[@]}"; do
