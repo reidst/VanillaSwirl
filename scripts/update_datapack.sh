@@ -3,7 +3,7 @@ function snake_to_title_case {
     local name="$1"
     for letter in {a..z}; do
         upper=${letter^}
-        name=${name//#$letter/$upper}
+        name=${name/#$letter/$upper}
         name=${name//_$letter/_$upper}
     done
     echo "${name//_/' '}"
@@ -27,7 +27,7 @@ for server in servers/*/; do
         echo "VanillaSwirl Error: unable to update datapacks because the server $server_name has no port."
         exit 1
     fi
-    if [ -n $actions ]; then
+    if [ -n "$actions" ]; then
         actions+=','
     fi
     actions+="{\"label\":\"Warp to ${server_display_name}\",\"action\":{\"type\":\"run_command\",\"command\":\"trigger vanillaswirl.warp set $port\"}}"
