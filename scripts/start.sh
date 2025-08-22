@@ -8,7 +8,8 @@ if ! ls servers/*/ >/dev/null 2>&1; then
     exit 1
 fi
 root=$(pwd)
-for server in servers/*; do
+for server in servers/*/; do
+    server=${server%/}
     cd $root/$server
     screen -S vanillaswirl.${server#*/} -d -m ./run.sh
 done

@@ -1,9 +1,4 @@
 #!/usr/bin/env bash
-function join_by {
-	local IFS="$1"
-	shift
-	echo "$*"
-}
 function detect_duplicates {
 	local templates=()
 	local len=0
@@ -36,26 +31,6 @@ function detect_missing_run {
 		fi
 	done
 }
-function snake_to_title_case {
-	local words
-	IFS='_' read -a words <<< "$1"
-	local len="${#words[@]}"
-	for (( i=0; i<len; i++ )); do
-		words[$i]=${words[$i]^}
-	done
-	local capitalized=$(join_by '_' "${words[@]}")
-	printf '%s' "${capitalized//_/\ }"
-}
-function generate_local_datapack (
-	cd $1
-	mkdir -p datapacks/vanillaswirl_local/data/vanillaswirl_local/function
-	mkdir -p datapacks/vanillaswirl_local/data/minecraft/tags/function
-	cp datapacks/vanillaswirl/pack.mcmeta datapacks/vanillaswirl_local/
-	mv ../*.mcfunction datapacks/vanillaswirl_local/data/vanillaswirl_local/function/
-	cd datapacks/vanillaswirl_local/data/minecraft/tags/function
-	echo '{"values":["vanillaswirl_local:load"]}' > load.json
-	echo '{"values":["vanillaswirl_local:tick"]}' > tick.json
-)
 
 if ls servers/*/ >/dev/null 2>&1; then
 	echo "VanillaSwirl Error: servers have already been generated."
@@ -73,7 +48,7 @@ detect_duplicates
 detect_missing_run
 
 port=25565
-warp_buttons=()
+root=$(pwd)
 for template_name in templates/*/; do
 	template_name=${template_name%/}
 	clean_name=${template_name#*/}
@@ -94,25 +69,20 @@ for template_name in templates/*/; do
 	chmod u+x servers/$clean_name/run.sh
 	printf '\nserver-port=%s' "${port}" >> servers/$clean_name/server.properties
 	sed -i '/^[[:space:]]*$/d' servers/$clean_name/server.properties
-	pretty_name=$(snake_to_title_case $clean_name)
-	warp_buttons+=("{\"label\":\"Warp to ${pretty_name}\",\"action\":{\"type\":\"run_command\",\"command\":\"trigger vanillaswirl.warp set $port\"}}")
 	(( port++ ))
-done
-
-cp -r datapack datapack.tmp
-button_list=$(join_by ',' "${warp_buttons[@]}")
-sed -i 's/\[\]/\['"$button_list"'\]/' datapack.tmp/data/vanillaswirl/dialog/warp_menu.json
-server_hostname=$(cat hostname.txt)
-sed -i "s/localhost/$server_hostname/" datapack.tmp/data/vanillaswirl/function/transfer.mcfunction
-for server in servers/*/; do
-	server=${server%/}
-	world_name=$(grep '^level-name=' $server/server.properties | tail -1)
-	world_name=${world_name#*=}
-	world_name=${world_name:-world}
-	mkdir -p $server/$world_name/datapacks
-	cp -r datapack.tmp $server/$world_name/datapacks/vanillaswirl
-	if [ -f "$server/load.mcfunction" ] || [ -f "$server/tick.mcfunction" ]; then
-		generate_local_datapack $server/$world_name
+	if ls servers/$clean_name/*.mcfunction >/dev/null 2>&1; then
+		world_name=$(grep '^level-name=' servers/$clean_name/server.properties | tail -1)
+		world_name=${world_name#*=}
+		world_name=${world_name:-world}
+		mkdir -p servers/$clean_name/$world_name/datapacks/vanillaswirl_local
+		cp datapack/pack.mcmeta servers/$clean_name/$world_name/datapacks/vanillaswirl_local/
+		cd servers/$clean_name/$world_name
+		mkdir -p datapacks/vanillaswirl_local/data/vanillaswirl_local/function
+		mkdir -p datapacks/vanillaswirl_local/data/minecraft/tags/function
+		mv ../*.mcfunction datapacks/vanillaswirl_local/data/vanillaswirl_local/function/
+		cd datapacks/vanillaswirl_local/data/minecraft/tags/function
+		echo '{"values":["vanillaswirl_local:load"]}' > load.json
+		echo '{"values":["vanillaswirl_local:tick"]}' > tick.json
+		cd $root
 	fi
 done
-rm -r datapack.tmp
