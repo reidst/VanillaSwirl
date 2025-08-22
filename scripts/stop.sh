@@ -11,3 +11,6 @@ fi
 scripts/global_command.sh "say The server will be shutting down in $timer seconds."
 sleep $timer
 scripts/global_command.sh "stop"
+while screen -ls | grep -q '\.vanillaswirl\.'; do
+    sleep 1
+done
