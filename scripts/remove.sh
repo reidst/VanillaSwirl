@@ -13,7 +13,7 @@ if [ ! -d "servers/$1" ]; then
 fi
 port=$(grep -sh '^server-port=' "servers/$1/server.properties" | tail -1 | cut -d'=' -f 2)
 for server in servers/*/; do
-    other_port=$(grep -sh '^server-port=' $server/server.properties | tail 1 | cut -d'=' -f 2)
+    other_port=$(grep -sh '^server-port=' $server/server.properties | tail -1 | cut -d'=' -f 2)
     if ((port < other_port)); then
         sed -i 's/^server-port=[0-9]*$/server-port='"$((other_port - 1))/" $server/server.properties
     fi

@@ -9,10 +9,7 @@ function snake_to_title_case {
     echo "${name//_/' '}"
 }
 
-if ! ls servers/*/ >/dev/null 2>&1; then
-    echo "VanillaSwirl Error: there are no servers to update."
-    exit 1
-fi
+if ! ls servers/*/ >/dev/null 2>&1; then exit; fi
 if [ ! -f hostname.txt ] || [ -z "$(cat hostname.txt)" ]; then
     echo "VanillaSwirl Error: missing or empty hostname.txt file."
     exit 1
