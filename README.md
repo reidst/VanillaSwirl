@@ -4,17 +4,19 @@
 ## Table of Contents
 - [About](#about)
 - [Installation](#installation)
-- [Configuration](#configuration)
-    - [Appended files](#appended-files)
-    - [`.mcfunction` files](#mcfunction-files)
-    - [Template names](#template-names)
-    - [Necessary common configuration](#necessary-common-configuration)
 - [Usage](#usage)
     - [`generate.sh`](#generatesh)
     - [`start.sh`](#startsh)
     - [`stop.sh [time]`](#stopsh-time)
+    - [`add.sh <path>`](#addsh-path)
+    - [`remove.sh <world>`](#removesh-world)
     - [`backup.sh [name]`](#backupsh-name)
     - [`global_command.sh <command>`](#global_commandsh-command)
+- [Templates](#templates)
+    - [Appended files](#appended-files)
+    - [`.mcfunction` files](#mcfunction-files)
+    - [Template names](#template-names)
+    - [Necessary common configuration](#necessary-common-configuration)
 - [Datapacks](#datapacks)
 - [Notes](#notes)
 
@@ -47,18 +49,108 @@ would enter into the "Server Address" field in Minecraft's multiplayer menu):
 ```sh
 $ echo 'myserverdomainname.net' > hostname.txt
 ```
-5. Configure your worlds. See [Configuration](#configuration) below.
-6. Build your worlds, generating a separate server in the `servers/` directory
-for each world template:
+5. Create a world template for each world you wish to host (see
+[Templates](#templates) for details), then generate them:
 ```sh
 $ scripts/generate.sh
 ```
+6. If you have existing servers you wish to add to VanillaSwirl, you can do so:
+```sh
+$ scripts/add.sh <old server path>
+```
+7. Start the server:
+```sh
+$ scripts/start.sh
+```
+Worlds can be stopped, backed up, or removed using the provided scripts; see
+[Usage](#usage).
 
-From here, worlds can be started, stopped, and backed up in bulk using the
-provided scripts (`scripts/(start,stop,backup).sh`). Note that worlds cannot be
-re-generated, started, or backed up if worlds are already running.
+## Usage
+VanillaSwirl is controlled through scripts in the `scripts/` directory.
 
-## Configuration
+### `generate.sh`
+Convert each world template into a physical server. This script does not run
+under any of the following conditions:
+- servers have already been generated
+- no templates have been provided
+- `hostname.txt` is missing or empty
+- there are multiple templates with the same name (ignoring sorting prefixes)
+- not all worlds would have an executable `run.sh` file
+
+Physical servers exist as `servers/` subdirectories named after their
+corresponding templates (with sorting prefixes removed; see
+[Template names](#template-names)).
+
+### `start.sh`
+Start each world as a server running in its own screen session. This script does
+not run under any of the following conditions:
+- servers are already running
+- servers have not yet been generated
+
+Screen session names take the form `<pid>.vanillaswirl.<world_name>`, and the
+sessions automatically end once the contained server process ends. If you wish
+to run a console command in a world, use the following:
+```sh
+# to run a command without seeing the output:
+$ screen -S vanillaswirl.<world_name> -X stuff '<your_command>^M'
+# to run a command interactively:
+$ screen -r vanillaswirl.<world_name>
+$ <your_command>
+# press Ctrl-a Ctrl-d to detach the screen
+```
+If you wish to run a command on every world simultaneously, see
+[global_command.sh](#global_commandsh).
+
+### `stop.sh [time]`
+Send a warning message to all worlds, waits some time, then stops them. This
+script does not run under any of the following conditions:
+- a time argument is given that is not a nonnegative integer
+- no servers are running
+
+The `time` argument is optional, defaulting to 30 seconds.
+
+### `add.sh <path>`
+Add an existing Minecraft server as a VanillaSwirl world. This script does not
+run under any of the following conditions:
+- a path argument that is a valid directory is not given
+- the new server has the same name as an existing server
+- the new server does not contain all of the following:
+    - `server.jar`
+    - an executable `run.sh`
+    - an agreement to the Minecraft EULA
+- the new server runs on the same port as an existing server
+
+The server given will be moved into the `servers/` directory, assigned a port if
+one is not declared, and modified to be compatible with the VanillaSwirl
+datapack (see
+[Necessary common configuration](#necessary-common-configuration)). The datapack
+is then regenerated and reloaded on all worlds.
+
+### `remove.sh <world>`
+Remove a world. This script does not run under any of the following conditions:
+- servers are running
+- a world argument that is the name of a `servers/` subdirectory is not given
+
+The server that hosted the world is moved to the `removed/` subdirectory;
+deletion of the world must be done manually.
+
+### `backup.sh [name]`
+Create a backup of each world. This script does not run under any of the
+following conditions:
+- servers are running
+- servers have not yet been generated
+
+The `name` field is optional, defaulting to `yyyy-mm-dd_HH-MM-SS.tar.gz`. For
+each world named `<server_name>`, there will be a corresponding
+`backups/<server_name>/` subdirectory that holds the backups for that world.
+
+### `global_command.sh <command>`
+Send a console command to all worlds. This script does not run under any of the
+following conditions:
+- a command argument is not provided
+- no servers are running
+
+## Templates
 For each world you want to serve, create a unique subdirectory within the
 `templates/` directory. Files in a template subdirectory will be unique to the
 world generated by that template. Template subdirectories are allowed to be
@@ -107,66 +199,6 @@ limitations. This can be modified or overridden on a per-world basis.
 - `server.properties` with the fields `accepts-transfers=true` and
 `function-permission-level=3` enables the builtin datapack to warp players
 between worlds. Do not modify or override these fields.
-
-## Usage
-VanillaSwirl is controlled through scripts in the `scripts/` directory.
-
-### `generate.sh`
-Convert each world template into a physical server. This script does not run
-under any of the following conditions:
-- servers have already been generated
-- no templates have been provided
-- `hostname.txt` is missing or empty
-- there are multiple templates with the same name (ignoring sorting prefixes)
-- not all worlds would have a `run.sh` file
-
-Physical servers exist as `servers/` subdirectories named after their
-corresponding templates (with sorting prefixes removed; see
-[Template names](#template-names)).
-
-### `start.sh`
-Start each world as a server running in its own screen session. This script does
-not run under any of the following conditions:
-- servers are already running
-- servers have not yet been generated
-
-Screen session names take the form `<pid>.vanillaswirl.<world_name>`, and the
-sessions automatically end once the contained server process ends. If you wish
-to run a console command in a world, use the following:
-```sh
-# to run a command without seeing the output:
-$ screen -S vanillaswirl.<world_name> -X stuff '<your_command>^M'
-# to run a command interactively:
-$ screen -r vanillaswirl.<world_name>
-$ <your_command>
-# press Ctrl-a Ctrl-d to detach the screen
-```
-If you wish to run a command on every world simultaneously, see
-[global_command.sh](#global_commandsh).
-
-### `stop.sh [time]`
-Send a warning message to all worlds, waits some time, then stops them. This
-script does not run under any of the following conditions:
-- a `time` argument was given that is not a nonnegative integer
-- no servers are running
-
-The `time` argument is optional, defaulting to 30 seconds.
-
-### `backup.sh [name]`
-Create a backup of each world. This script does not run under any of the
-following conditions:
-- servers are running
-- servers have not yet been generated
-
-The `name` field is optional, defaulting to `yyyy-mm-dd_HH-MM-SS.tar.gz`. For
-each world named `<server_name>`, there will be a corresponding
-`backups/<server_name>/` subdirectory that holds the backups for that world.
-
-### `global_command.sh <command>`
-Send a console command to all worlds. This script does not run under any of the
-following conditions:
-- a command argument is not provided
-- no servers are running
 
 ## Datapacks
 ### Builtin datapack
