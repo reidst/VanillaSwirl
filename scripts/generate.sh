@@ -97,3 +97,13 @@ for template_name in templates/*/; do
 	fi
 done
 scripts/update_datapack.sh
+if screen -ls | grep -q '\.vanillaswirl\.'; then
+	for server in servers/*/; do
+		server=${server%/}
+		name=${server#*/}
+		if ! screen -ls | grep -q '\.vanillaswirl\.'"${name}[[:space:]]"; then
+			cd $root/$server
+			screen -S ".vanillaswirl.$name" -d -m ./run.sh
+		fi
+	done
+fi
