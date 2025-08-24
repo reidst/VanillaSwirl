@@ -73,7 +73,7 @@ for template_name in templates/*/; do
 	fi
 	rmdir $template_name
 	chmod u+x servers/$clean_name/run.sh
-	if ! grep -q '^server-port=[0-9]$' servers/$clean_name/server.properties; then
+	if ! grep -q '^server-port=[0-9]' servers/$clean_name/server.properties; then
 		port=25565
 		while grep -q "^server-port=$port\$" servers/*/server.properties; do
 			((port++))
