@@ -10,38 +10,32 @@ fi
 for template in templates/*/; do
 	template=${template%/}
 	template_name=${template#*/}
-	clean_name=${template_name#*_}
 	port="$(grep -sh '^server-port=' $template/server.properties | tail -1 | cut -d'=' -f 2)"
-	for other_template in templates/*/; do
-		other_template=${other_template%/}
-		if [ $template == $other_template ]; then continue; fi
-		other_template_name=${other_template#*/}
-		other_clean_name=${other_template_name#*_}
-		if [ $clean_name == $other_clean_name ]; then
-			echo "VanillaSwirl Error: templates $template_name and $other_template_name have the same underlying name."
-			exit 1
-		fi
-		if ! grep -sq '^server-port=' $other_template/server.properties; then continue; fi
-		other_port=$(grep -h '^server-port=' $other_template/server.properties | tail -1 | cut -d'=' -f 2)
-		if [ "$port" == "$other_port" ]; then
-			echo "VanillaSwirl Error: templates $template_name and $other_template_name have the same port."
-			exit 1
-		fi
-	done
-	if ! ls servers/*/ >/dev/null 2>&1; then continue; fi
-	for server in servers/*/; do
-		server=${server%/}
-		server_name=${server#*/}
-		if [ "$clean_name" == "$server_name" ]; then
-			echo "VanillaSwirl Error: a server named $server_name already exists."
-			exit 1
-		fi
-		other_port=$(grep -h '^server-port=' $server/server.properties | tail -1 | cut -d'=' -f 2)
-		if [ "$port" == "$other_port" ]; then
-			echo "VanillaSwirl Error: port $port (requested by template $template_name) is already in use by $server_name."
-			exit 1
-		fi
-	done
+	if [ -n "$port" ]; then
+		for other in templates/*/; do
+			other=${other%/}
+			other_name=${other#*/}
+			if [ "$template" == "$other" ]; then continue; fi
+			if grep -sq "^server-port=$port\$" $other/server.properties; then
+				echo "VanillaSwirl Error: templates $template_name and $other_name both request port $port."
+				exit 1
+			fi
+		done
+	fi
+	if ls servers/*/ >/dev/null 2>&1; then
+		for server in servers/*/; do
+			server=${server%/}
+			server_name=${server#*/}
+			if [ "$template_name" == "$server_name" ]; then
+				echo "VanillaSwirl Error: a server named $server_name already exists."
+				exit 1
+			fi
+			if [ -n "$port" ] && grep -q "^server-port=$port\$" $server/server.properties; then
+				echo "VanillaSwirl Error: port $port (requested by template $template_name) is already in use by $server_name."
+				exit 1
+			fi
+		done
+	fi
 done
 if [ ! -x common/run.sh ]; then
 	for template in templates/*/; do
@@ -54,39 +48,38 @@ if [ ! -x common/run.sh ]; then
 fi
 
 root=$(pwd)
-for template_name in templates/*/; do
-	template_name=${template_name%/}
-	clean_name=${template_name#*/}
-	clean_name=${template_name#*_}
-	mkdir servers/$clean_name
-	cp -r common/* servers/$clean_name/
-	if ls $template_name/* >/dev/null 2>&1; then
-		for template_file in $template_name/*; do
+for template in templates/*/; do
+	template=${template%/}
+	template_name=${template#*/}
+	mkdir servers/$template_name
+	cp -r common/* servers/$template_name/
+	if ls $template/* >/dev/null 2>&1; then
+		for template_file in $template/*; do
 			if [ "${template_file##*/}" == "server.properties" ]; then
-				echo >> servers/$clean_name/server.properties
-				cat $template_file >> servers/$clean_name/server.properties
+				echo >> servers/$template_name/server.properties
+				cat $template_file >> servers/$template_name/server.properties
 			else
-				cp -r $template_file servers/$clean_name/
+				cp -r $template_file servers/$template_name/
 			fi
 			rm -r $template_file
 		done
 	fi
-	rmdir $template_name
-	chmod u+x servers/$clean_name/run.sh
-	if ! grep -q '^server-port=[0-9]' servers/$clean_name/server.properties; then
+	rmdir $template
+	chmod u+x servers/$template_name/run.sh
+	if ! grep -q '^server-port=[0-9]' servers/$template_name/server.properties; then
 		port=25565
 		while grep -q "^server-port=$port\$" servers/*/server.properties; do
 			((port++))
 		done
-		echo -e "\nserver-port=$port" >> servers/$clean_name/server.properties
+		echo -e "\nserver-port=$port" >> servers/$template_name/server.properties
 	fi
-	if ls servers/$clean_name/*.mcfunction >/dev/null 2>&1; then
-		world_name=$(grep '^level-name=' servers/$clean_name/server.properties | tail -1)
+	if ls servers/$template_name/*.mcfunction >/dev/null 2>&1; then
+		world_name=$(grep '^level-name=' servers/$template_name/server.properties | tail -1)
 		world_name=${world_name#*=}
 		world_name=${world_name:-world}
-		mkdir -p servers/$clean_name/$world_name/datapacks/vanillaswirl_local
-		cp datapack/pack.mcmeta servers/$clean_name/$world_name/datapacks/vanillaswirl_local/
-		cd servers/$clean_name/$world_name
+		mkdir -p servers/$template_name/$world_name/datapacks/vanillaswirl_local
+		cp datapack/pack.mcmeta servers/$template_name/$world_name/datapacks/vanillaswirl_local/
+		cd servers/$template_name/$world_name
 		mkdir -p datapacks/vanillaswirl_local/data/vanillaswirl_local/function
 		mkdir -p datapacks/vanillaswirl_local/data/minecraft/tags/function
 		mv ../*.mcfunction datapacks/vanillaswirl_local/data/vanillaswirl_local/function/
