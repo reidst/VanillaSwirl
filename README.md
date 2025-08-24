@@ -109,12 +109,15 @@ If you wish to run a command on every world simultaneously, see
 [global_command.sh](#global_commandsh).
 
 ### `stop.sh [time]`
-Send a warning message to all worlds, wait some time, then stop them. This
+Stop all worlds, optionally sending a warning message some time beforehand. This
 script does not run under any of the following conditions:
 - a time argument is given that is not a nonnegative integer
 - VanillaSwirl is not running
 
-The `time` argument is optional, defaulting to 30 seconds.
+The `time` argument is an optional value in seconds. If provided, a warning
+message will be sent to all worlds to notify active players, then VanillaSwirl
+will wait the requested number of seconds before stopping all worlds. If not
+provided, there will be no messages, and the worlds will be stopped instantly.
 
 ### `add.sh <path>`
 Add an existing Minecraft server as a VanillaSwirl world. This script does not
