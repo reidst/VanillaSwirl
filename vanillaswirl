@@ -1,0 +1,125 @@
+#!/usr/bin/env bash
+
+# helper functions
+usage() {
+	echo 'Usage: vanillaswirl (add|backup|command|generate|remove|start|stop)'
+}
+error() {
+	local errcode=1
+	local errmsg='unknown error'
+		case $# in
+		1)
+			errmsg=$1
+			;;
+		2)
+			errcode=$1
+			errmsg=$2
+			;;
+		*)
+			;;
+	esac
+	if [ -n "$1" ]; then
+		echo "VanillaSwirl Error: $1"
+	fi
+	return "${2:-1}"
+}
+
+# subcommands
+cmd_add() {
+	# TODO write add subcommand
+	# require 1 argument: name of an existing directory
+	# ensure no name collision with existing worlds
+	# ensure it has a server.jar, an executable run.sh, and a true EULA
+	# does it declare a port?
+		# if so, ensure it is not already in use
+		# if not, give it the lowest available port >= 25565
+	# set the mandatory server.properties
+	# move it into worlds/
+	# update datapacks
+	# if VanillaSwirl is running, run the new world
+}
+cmd_backup() {
+	# TODO write backup subcommand
+	# allow 1 argument: backup name, defaults to date
+	# ensure VanillaSwirl is not running
+	# ensure there is no name collision
+	# create backups of each world
+}
+cmd_command() {
+	# TODO write command subcommand
+	# require 1 argument: command to run
+	# ensure VanillaSwirl is running
+	# run the command on every world
+}
+cmd_generate() {
+	# TODO write generate command
+	# ensure template directory is not empty
+	# ensure hostname.txt is not empty
+	# ensure no template shares a name with an existing world
+	# ensure no two templates request the same port
+	# ensure no template requests an occupied port
+	# ensure each generated world will have an executable run.sh
+	# for each template:
+		# create a new world directory
+		# copy over common config files
+		# copy over template config files, handling server.properties in append mode
+		# if the template doesn't declare a port, give it the lowest port >= 25565 not used by any world/template
+		# set the mandatory server.properties
+		# if there are .mcfunction files, generate a local datapack
+	# update datapacks
+	# if VanillaSwirl is running, run the new worlds
+}
+cmd_remove() {
+	# TODO write remove command
+	# require 1 argument: the name of an existing world
+	# ensure VanillaSwirl is not running
+	# move the world to the removed/ directory
+	# update datapacks
+}
+cmd_start() {
+	# TODO write start command
+	# ensure VanillaSwirl is not already running
+	# ensure there are worlds to start
+	# for each world:
+		# run it in a screen session
+}
+cmd_stop() {
+	# TODO write stop command
+	# allow 1 argument: a nonnegative integer in seconds
+	# ensure VanillaSwirl is running
+	# is the argument provided?
+	# if so:
+		# notify all worlds of impending stoppage
+		# wait
+	# for each world:
+		# stop
+	# wait for all screen sessions to end
+}
+
+# entry point
+main() {
+	local subcommand="$1"
+	shift
+	case $subcommand in
+		add)
+			cmd_add "$@" ;;
+		backup)
+			cmd_backup "$@" ;;
+		command)
+			cmd_command "$@" ;;
+		generate)
+			cmd_generate "$@" ;;
+		remove)
+			cmd_remove "$@" ;;
+		start)
+			cmd_start "$@" ;;
+		stop)
+			cmd_stop "$@" ;;
+		*)
+			error "unknown command: '$subcommand'"
+			return
+			;;
+	esac
+}
+
+main "$@"
