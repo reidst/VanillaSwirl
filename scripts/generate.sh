@@ -68,7 +68,7 @@ for template in templates/*/; do
 	chmod u+x servers/$template_name/run.sh
 	if ! grep -q '^server-port=[0-9]' servers/$template_name/server.properties; then
 		port=25565
-		while grep -q "^server-port=$port\$" servers/*/server.properties; do
+		while grep -q "^server-port=$port\$" {servers,templates}/*/server.properties; do
 			((port++))
 		done
 		echo -e "\nserver-port=$port" >> servers/$template_name/server.properties
