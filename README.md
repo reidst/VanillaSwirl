@@ -15,7 +15,6 @@
 - [Templates](#templates)
     - [Appended files](#appended-files)
     - [`.mcfunction` files](#mcfunction-files)
-    - [Template names](#template-names)
     - [Necessary common configuration](#necessary-common-configuration)
 - [Datapacks](#datapacks)
 - [Notes](#notes)
@@ -58,7 +57,7 @@ $ scripts/generate.sh
 ```sh
 $ scripts/add.sh <old server path>
 ```
-7. Start the server:
+7. Run VanillaSwirl:
 ```sh
 $ scripts/start.sh
 ```
@@ -71,24 +70,32 @@ VanillaSwirl is controlled through scripts in the `scripts/` directory.
 ### `generate.sh`
 Convert each world template into a physical server. This script does not run
 under any of the following conditions:
-- servers have already been generated
-- no templates have been provided
+- there are no templates to generate
 - `hostname.txt` is missing or empty
-- there are multiple templates with the same name (ignoring sorting prefixes)
+- multiple templates request the same port
+- a template requests the same port as an existing world
+- a template has the same name as an existing world
 - not all worlds would have an executable `run.sh` file
 
-Physical servers exist as `servers/` subdirectories named after their
-corresponding templates (with sorting prefixes removed; see
-[Template names](#template-names)).
+Each template generates an individual Minecraft server with the same name living
+in the `servers/` subdirectory.
+
+If a port is not specified (i.e., the `server-port` field of the template's
+`server.properties` file is missing), the lowest available port starting at
+25565 is assigned. Templates are generated in lexicographical order, so a
+template named `b` without a specified port would receive a port after a
+template named `a` without a specified port. This is really only relevant for
+port 25565, to which players joining a VanillaSwirl server will be sent each
+time they join the server (unless players explicitly specify a different port).
 
 ### `start.sh`
 Start each world as a server running in its own screen session. This script does
 not run under any of the following conditions:
-- servers are already running
-- servers have not yet been generated
+- VanillaSwirl is already running
+- worlds have not yet been generated
 
 Screen session names take the form `<pid>.vanillaswirl.<world_name>`, and the
-sessions automatically end once the contained server process ends. If you wish
+sessions automatically end once the contained `run.sh` process ends. If you wish
 to run a console command in a world, use the following:
 ```sh
 # to run a command without seeing the output:
@@ -102,10 +109,10 @@ If you wish to run a command on every world simultaneously, see
 [global_command.sh](#global_commandsh).
 
 ### `stop.sh [time]`
-Send a warning message to all worlds, waits some time, then stops them. This
+Send a warning message to all worlds, wait some time, then stop them. This
 script does not run under any of the following conditions:
 - a time argument is given that is not a nonnegative integer
-- no servers are running
+- VanillaSwirl is not running
 
 The `time` argument is optional, defaulting to 30 seconds.
 
@@ -113,32 +120,32 @@ The `time` argument is optional, defaulting to 30 seconds.
 Add an existing Minecraft server as a VanillaSwirl world. This script does not
 run under any of the following conditions:
 - a path argument that is a valid directory is not given
-- the new server has the same name as an existing server
-- the new server does not contain all of the following:
+- the server has the same name as an existing world
+- the server does not contain all of the following:
     - `server.jar`
     - an executable `run.sh`
     - an agreement to the Minecraft EULA
-- the new server runs on the same port as an existing server
+- the server runs on the same port as an existing world
 
 The server given will be moved into the `servers/` directory, assigned a port if
 one is not declared, and modified to be compatible with the VanillaSwirl
-datapack (see
+datapack (see the `server.properties` fields in
 [Necessary common configuration](#necessary-common-configuration)). The datapack
 is then regenerated and reloaded on all worlds.
 
 ### `remove.sh <world>`
 Remove a world. This script does not run under any of the following conditions:
-- servers are running
+- VanillaSwirl is running
 - a world argument that is the name of a `servers/` subdirectory is not given
 
-The server that hosted the world is moved to the `removed/` subdirectory;
-deletion of the world must be done manually.
+The world is moved to the `removed/` directory; deletion of the world must be
+done manually.
 
 ### `backup.sh [name]`
 Create a backup of each world. This script does not run under any of the
 following conditions:
-- servers are running
-- servers have not yet been generated
+- VanillaSwirl is running
+- worlds have not yet been generated
 
 The `name` field is optional, defaulting to `yyyy-mm-dd_HH-MM-SS.tar.gz`. For
 each world named `<server_name>`, there will be a corresponding
@@ -148,13 +155,13 @@ each world named `<server_name>`, there will be a corresponding
 Send a console command to all worlds. This script does not run under any of the
 following conditions:
 - a command argument is not provided
-- no servers are running
+- VanillaSwirl is not running
 
 ## Templates
 For each world you want to serve, create a unique subdirectory within the
 `templates/` directory. Files in a template subdirectory will be unique to the
 world generated by that template. Template subdirectories are allowed to be
-empty, meaning a world will be generated with no unique files.
+empty, in which case a world would be generated with no unique files.
 
 Files that should be common to all worlds (e.g., `eula.txt` and `server.jar`) go
 in the `common/` directory. Each world generated will have a copy of these
@@ -174,22 +181,6 @@ applied.
 ### `.mcfunction` files
 Minecraft function files in a configuration directory will generate a datapack;
 see [Template datapacks](#template-datapacks) for more information.
-
-### Template names
-Server ports are assigned by the lexicographical order of the template
-subdirectory names. This means the first template is given the port 25565, the
-next is given 25566, and so on.
-
-To allow for greater control over the names of generated worlds, templates are
-stripped of all characters up to and including the first underscore when being
-generated into worlds. Therefore, template names are expected to take the form
-`<prefix>_<name>`. No two templates may have the same `<name>`, even if their
-`<prefix>`es do not match.
-
-For example, the templates `0_hub`, `1_creative_sandbox`, and `2_hardcore` would
-generate servers named `hub` (running on port 25565), `creative_sandbox`
-(25566), and `hardcore` (25567). They would appear in the
-[Warp Menu](#builtin-datapack) as "Hub", "Creative Sandbox", and "Hardcore."
 
 ### Necessary common configuration
 The following files are required by each world and therefore come preinstalled
@@ -218,8 +209,8 @@ namespace. This datapack will add the `vanillaswirl_local:load` and
 `#minecraft:tick` function tags.
 
 ## Notes
-This project was made in a few afternoons by a stubborn Minecrafter who wanted
-to host a small server network and refused to install server-side mods. That is
-to say, this is a personal project with personal goals. Don't expect me to
-respond to issues or pull requests with any urgency (but if you wish to fork the
-project and continue it yourself, please feel free to do so).
+This project was made by a stubborn Minecrafter who wanted to host a small
+server network and refused to install server-side mods. That is to say, this is
+a personal project with personal goals. Don't expect me to respond to issues or
+pull requests with any urgency (but if you wish to fork the project and continue
+it yourself, please feel free to do so).
