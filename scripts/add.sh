@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-if [ -z $1 ] || [ ! -d $1 ]; then
+if [ -z "$1" ] || [ ! -d "$1" ]; then
     echo "VanillaSwirl Error: a directory argument is required."
     exit 1
 fi
@@ -38,14 +38,17 @@ else
         fi
     done
 fi
-printf '\n' >> $server/server.properties
-echo "server-port=$server_port" >> $server/server.properties
+echo -e "\nserver-port=$server_port" >> $server/server.properties
 echo "accepts-transfers=true" >> $server/server.properties
 function_permission_level=$(grep -h '^function-permission-level=' $server/server.properties | tail -1 | cut -d'=' -f 2)
 if [ -z $function_permission_level ] || ((function_permission_level < 3)); then
     echo "function-permission-level=3" >> $server/server.properties
 fi
-sed -i '/^\w*$/d' $server/server.properties
+if grep -q '^server-port=25565$' $server/server.properties; then
+    if ! grep -q '^motd=' $server/server.properties; then
+        echo "motd=A VanillaSwirl Minecraft Server" >> $server/server.properties
+    fi
+fi
 mv $server servers/
 if screen -ls | grep -q '\.vanillaswirl\.'; then
     root=$(pwd)

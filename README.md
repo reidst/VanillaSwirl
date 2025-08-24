@@ -183,13 +183,15 @@ Minecraft function files in a configuration directory will generate a datapack;
 see [Template datapacks](#template-datapacks) for more information.
 
 ### Necessary common configuration
-The following files are required by each world and therefore come preinstalled
-under `common/`:
-- `run.sh` calls the java runtime and decides parameters such as memory
-limitations. This can be modified or overridden on a per-world basis.
-- `server.properties` with the fields `accepts-transfers=true` and
-`function-permission-level=3` enables the builtin datapack to warp players
-between worlds. Do not modify or override these fields.
+Each world is required to have all of the following:
+- an executable `run.sh` that starts the world's `server.jar` and sets the JVM's
+and Minecraft server's flags.
+- an `eula.txt` with the field `eula=true`. The Minecraft server will not start
+without, so VanillaSwirl also requires it. For legal reasons, VanillaSwirl does
+not provide it automatically.
+- a `server.properties` with the fields `accepts-transfers=true` and
+`function-permission-level=3`. This cannot be overridden; VanillaSwirl ensures
+these fields are set.
 
 ## Datapacks
 ### Builtin datapack

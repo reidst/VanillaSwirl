@@ -73,6 +73,17 @@ for template in templates/*/; do
 		done
 		echo -e "\nserver-port=$port" >> servers/$template_name/server.properties
 	fi
+	echo -e "\naccepts-transfers=true" >> servers/$template_name/server.properties
+	function_permission_level=$(grep -h '^function-permission-level=' servers/$template_name/server.properties | tail -1 | cut -d'=' -f 2)
+	function_permission_level=${function_permission_level:-2}
+	if ((function_permission_level < 3)); then
+		echo -e "\nfunction-permission-level=3" >> servers/$template_name/server.properties
+	fi
+	if grep -q '^server-port=25565' servers/$template_name/server.properties; then
+		if ! grep -q '^motd=' servers/$template_name/server.properties; then
+			echo -e "\nmotd=A VanillaSwirl Minecraft Server" >> servers/$template_name/server.properties
+		fi
+	fi
 	if ls servers/$template_name/*.mcfunction >/dev/null 2>&1; then
 		world_name=$(grep '^level-name=' servers/$template_name/server.properties | tail -1)
 		world_name=${world_name#*=}
