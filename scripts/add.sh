@@ -5,7 +5,7 @@ if [ -z "$1" ] || [ ! -d "$1" ]; then
 fi
 server=${1%/}
 server_name=${server##*/}
-if [ -e servers/$server_name ]; then
+if [ -e worlds/$server_name ]; then
     echo "VanillaSwirl Error: a world named $server_name already exists."
     exit 1
 fi
@@ -21,7 +21,7 @@ if ! grep -sq '^eula=true$' $server/eula.txt; then
     echo "VanillaSwirl Error: the new world does not agree to the Minecraft EULA."
     exit 1
 fi
-ports=($(grep -sh '^server-port=' servers/*/server.properties | cut -d'=' -f 2))
+ports=($(grep -sh '^server-port=' worlds/*/server.properties | cut -d'=' -f 2))
 if ! grep -sq '^server-port=' $server/server.properties; then
     server_port=25565
     for port in "${ports[@]}"; do
@@ -49,10 +49,10 @@ if grep -q '^server-port=25565$' $server/server.properties; then
         echo "motd=A VanillaSwirl Minecraft Server" >> $server/server.properties
     fi
 fi
-mv $server servers/
+mv $server worlds/
 if screen -ls | grep -q '\.vanillaswirl\.'; then
     root=$(pwd)
-    cd servers/$server_name
+    cd worlds/$server_name
     screen -S vanillaswirl.$server_name -d -m ./run.sh
     cd $root
 fi

@@ -53,7 +53,7 @@ $ echo 'myserverdomainname.net' > hostname.txt
 ```sh
 $ scripts/generate.sh
 ```
-6. If you have existing servers you wish to add to VanillaSwirl, you can do so:
+6. If you have existing servers you wish to add to VanillaSwirl, do so:
 ```sh
 $ scripts/add.sh <old server path>
 ```
@@ -78,7 +78,7 @@ under any of the following conditions:
 - not all worlds would have an executable `run.sh` file
 
 Each template generates an individual Minecraft server with the same name living
-in the `servers/` subdirectory.
+in the `worlds/` subdirectory.
 
 If a port is not specified (i.e., the `server-port` field of the template's
 `server.properties` file is missing), the lowest available port starting at
@@ -130,7 +130,7 @@ run under any of the following conditions:
     - an agreement to the Minecraft EULA
 - the server runs on the same port as an existing world
 
-The server given will be moved into the `servers/` directory, assigned a port if
+The server given will be moved into the `worlds/` directory, assigned a port if
 one is not declared, and modified to be compatible with the VanillaSwirl
 datapack (see the `server.properties` fields in
 [Necessary common configuration](#necessary-common-configuration)). The datapack
@@ -139,7 +139,7 @@ is then regenerated and reloaded on all worlds.
 ### `remove.sh <world>`
 Remove a world. This script does not run under any of the following conditions:
 - VanillaSwirl is running
-- a world argument that is the name of a `servers/` subdirectory is not given
+- a world argument that is the name of a `worlds/` subdirectory is not given
 
 The world is moved to the `removed/` directory; deletion of the world must be
 done manually.
@@ -151,8 +151,8 @@ following conditions:
 - worlds have not yet been generated
 
 The `name` field is optional, defaulting to `yyyy-mm-dd_HH-MM-SS.tar.gz`. For
-each world named `<server_name>`, there will be a corresponding
-`backups/<server_name>/` subdirectory that holds the backups for that world.
+each world named `<world_name>`, there will be a corresponding
+`backups/<world_name>/` subdirectory that holds the backups for that world.
 
 ### `global_command.sh <command>`
 Send a console command to all worlds. This script does not run under any of the
@@ -183,7 +183,7 @@ applied.
 
 ### `.mcfunction` files
 Minecraft function files in a configuration directory will generate a datapack;
-see [Template datapacks](#template-datapacks) for more information.
+see [Template datapacks](#template-datapacks) for details.
 
 ### Necessary common configuration
 Each world is required to have all of the following:
