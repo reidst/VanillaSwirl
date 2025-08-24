@@ -4,7 +4,7 @@ if [ -z "$1" ]; then
     exit 1
 fi
 if ! screen -ls | grep -q '\.vanillaswirl\.'; then
-    echo "VanillaSwirl Error: no servers are currently running."
+    echo "VanillaSwirl Error: no worlds are running."
     exit 1
 fi
 for session in /var/run/screen/S-$USER/*; do

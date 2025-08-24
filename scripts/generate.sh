@@ -27,7 +27,7 @@ for template in templates/*/; do
 			server=${server%/}
 			server_name=${server#*/}
 			if [ "$template_name" == "$server_name" ]; then
-				echo "VanillaSwirl Error: a server named $server_name already exists."
+				echo "VanillaSwirl Error: a world named $server_name already exists."
 				exit 1
 			fi
 			if [ -n "$port" ] && grep -q "^server-port=$port\$" $server/server.properties; then

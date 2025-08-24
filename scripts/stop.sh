@@ -5,7 +5,7 @@ if ! [ "$timer" -ge 0 ] 2>/dev/null; then
     exit 1
 fi
 if ! screen -ls | grep -q '\.vanillaswirl\.'; then
-    echo "VanillaSwirl Error: no servers are currently running."
+    echo "VanillaSwirl Error: there are no worlds to stop."
     exit 1
 fi
 scripts/global_command.sh "say The server will be shutting down in $timer seconds."

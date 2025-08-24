@@ -20,8 +20,8 @@ for server in servers/*/; do
     server_name=${server#*/}
     server_display_name="$(snake_to_title_case $server_name)"
     port="$(grep -sh '^server-port=' $server/server.properties | tail -1 | cut -d'=' -f 2)"
-    if [ -z $port ]; then
-        echo "VanillaSwirl Error: unable to update datapacks because the server $server_name has no port."
+    if [ -z "$port" ]; then
+        echo "VanillaSwirl Error: unable to update datapacks because the world $server_name has no port."
         exit 1
     fi
     if [ -n "$actions" ]; then
