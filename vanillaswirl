@@ -5,38 +5,105 @@ usage() {
 	echo 'Usage: vanillaswirl (add|backup|command|generate|remove|start|stop)'
 }
 error() {
-	local errcode=1
 	local errmsg='unknown error'
-		case $# in
-		1)
-			errmsg=$1
-			;;
-		2)
-			errcode=$1
-			errmsg=$2
-			;;
-		*)
-			;;
-	esac
-	if [ -n "$1" ]; then
-		echo "VanillaSwirl Error: $1"
+	if [[ -n $1 ]]; then
+		errmsg=$1
 	fi
-	return "${2:-1}"
+	echo "VanillaSwirl: $errmsg" >&2
+	return 1
+}
+is_vanillaswirl_running() {
+	screen -ls | grep -q 'vanillaswirl\.'
+	return
+}
+update_datapack() {
+	error 'update_datapack: unimplemented'
+	return
+}
+start_single_server() {
+	local name=$1
+	cd "worlds/$name" || exit
+	screen -S "vanillaswirl.$name" -d -m ./run.sh
+	cd -
 }
 
 # subcommands
 cmd_add() {
-	# TODO write add subcommand
 	# require 1 argument: name of an existing directory
+	if (($# != 1)); then
+		error "add: 1 argument required, but got $#"
+		return
+	fi
+	local server_path=$(realpath -q "$1")
+	if (($? != 0)) || [[ ! -d $server_path ]]; then
+		error "add: expected a directory path, but got ${server_path:-$1}"
+		return
+	fi
 	# ensure no name collision with existing worlds
+	local server_name=${server_path##*/}
+	if [[ -e "worlds/$server_name" ]]; then
+		error "add: a world named '$server_name' already exists"
+		return
+	fi
 	# ensure it has a server.jar, an executable run.sh, and a true EULA
+	if [[ ! -f "$server_path/server.jar" ]]; then
+		error 'add: the new server is missing a server.jar'
+		return
+	fi
+	if [[ ! -x "$server_path/run.sh" ]]; then
+		error 'add: the new server is missing an executable run.sh'
+		return
+	fi
+	if [[ ! -f "$server_path/eula.txt" ]] || ! grep -q 'eula=true' "$server_path/eula.txt"; then
+		error 'add: the new server does not agree to the Minecraft EULA'
+		return
+	fi
 	# does it declare a port?
 		# if so, ensure it is not already in use
 		# if not, give it the lowest available port >= 25565
+	local used_ports=()
+	for world in worlds/*; do
+		if [[ ! -d $world ]]; then continue; fi
+		if grep -sh '^server-port=[0-9]' "$world/server.properties"; then
+			used_ports+=($(grep -h '^server-port=[0-9]' "$world/server.properties" | tail -n 1 | cut -d '=' -f 2))
+		fi
+	done
+	local port=$(grep -sh '^server-port=[0-9]' "$server_path/server.properties" | tail -n 1)
+	port=${port#*=}
+	if [[ -n $port ]]; then
+		for used_port in "${used_ports[@]}"; do
+			if ((port != used_port)); then continue; fi
+			error "add: the new server declares the same port as an existing world ($port)"
+			return
+		done
+	else
+		port=25564
+		local free=false
+		while [[ $free == 'false' ]]; do
+			((port++))
+			free=true
+			for used_port in "${used_ports[@]}"; do
+				if ((port != used_port)); then continue; fi
+				free=false
+				break
+			done
+		done
+	fi
 	# set the mandatory server.properties
+	echo -e "\nserver-port=$port" >> "$server_path/server.properties"
+	echo 'accepts-transfers=true' >> "$server_path/server.properties"
+	local function_permission_level=$(grep -h '^function-permission-level=' | tail -n 1 | cut -d '=' -f 2)
+	if [[ -z $function_permission_level ]] || ((function_permission_level < 3)); then
+		echo 'function-permission-level=3' >> "$server_path/server.properties"
+	fi
 	# move it into worlds/
+	mv $server_path worlds/
 	# update datapacks
+	update_datapack
 	# if VanillaSwirl is running, run the new world
+	if is_vanillaswirl_running; then
+		start_single_server "$server_name"
+	fi
 }
 cmd_backup() {
 	# TODO write backup subcommand
@@ -102,19 +169,33 @@ main() {
 	shift
 	case $subcommand in
 		add)
-			cmd_add "$@" ;;
+			cmd_add "$@"
+			return
+			;;
 		backup)
-			cmd_backup "$@" ;;
+			cmd_backup "$@"
+			return
+			;;
 		command)
-			cmd_command "$@" ;;
+			cmd_command "$@"
+			return
+			;;
 		generate)
-			cmd_generate "$@" ;;
+			cmd_generate "$@"
+			return
+			;;
 		remove)
-			cmd_remove "$@" ;;
+			cmd_remove "$@"
+			return
+			;;
 		start)
-			cmd_start "$@" ;;
+			cmd_start "$@"
+			return
+			;;
 		stop)
-			cmd_stop "$@" ;;
+			cmd_stop "$@"
+			return
+			;;
 		*)
 			error "unknown command: '$subcommand'"
 			return
